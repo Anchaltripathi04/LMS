@@ -125,13 +125,13 @@ if ($isStudent) {
 }
 
 
-// 👨‍🏫 TEACHER + 🛠 ADMIN VIEW → SHOW FEEDBACK ONLY
+//  TEACHER + 🛠 ADMIN VIEW → SHOW FEEDBACK ONLY
 if ($isTeacher || $isAdmin) {
 
     echo '<div class="role-box">';
     
     if ($isAdmin) {
-        echo '🛠 Admin Dashboard';
+        echo ' Admin Dashboard';
     } else {
         echo 'Teacher Dashboard';
     }
