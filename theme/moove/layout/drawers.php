@@ -144,12 +144,12 @@ if (
     $username = fullname($USER);
     $coursecount = count(enrol_get_users_courses($USER->id));
 
-    // ✅ ROLE DETECTION
+    // ROLE DETECTION
     $isTeacher = has_capability('moodle/course:update', context_system::instance());
     $isStudent = !$isTeacher;
 
-    // ✅ DIFFERENT MESSAGE FOR STUDENT / TEACHER
-   // ✅ CORRECT ROLE DETECTION
+    // DIFFERENT MESSAGE FOR STUDENT / TEACHER
+   // CORRECT ROLE DETECTION
 $isAdmin = is_siteadmin($USER);
 
 // Teacher = has capability BUT not admin
@@ -159,7 +159,7 @@ $isTeacher = !$isAdmin && has_capability('moodle/course:update', context_system:
 $isStudent = !$isAdmin && !$isTeacher;
 
 
-// ✅ MESSAGE LOGIC
+// MESSAGE LOGIC
 if ($isAdmin) {
 
     $roleMessage = "You are logged in as Admin";
