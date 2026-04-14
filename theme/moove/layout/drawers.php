@@ -139,7 +139,7 @@ if (
     basename($_SERVER['PHP_SELF']) == 'index.php' &&
     strpos($_SERVER['REQUEST_URI'], '/my/') !== false &&
     !isset($_SESSION['popup_shown'])
-) {
+) 
 
     $username = fullname($USER);
     $coursecount = count(enrol_get_users_courses($USER->id));
@@ -157,6 +157,18 @@ $isTeacher = !$isAdmin && has_capability('moodle/course:update', context_system:
 
 // Student = neither admin nor teacher
 $isStudent = !$isAdmin && !$isTeacher;
+
+global $USER;
+
+// check if popup already shown permanently
+$popupshown = get_user_preferences('popup_shown', 0, $USER);
+
+// ensure only on dashboard + first time ever
+if (
+    basename($_SERVER['PHP_SELF']) == 'index.php' &&
+    strpos($_SERVER['REQUEST_URI'], '/my/') !== false &&
+    !$popupshown
+) {
 
 
 // MESSAGE LOGIC
@@ -270,5 +282,5 @@ if ($isAdmin) {
 
     echo $popup;
 
-    $_SESSION['popup_shown'] = true;
+    set_user_preference('popup_shown', 1, $USER);
 }
