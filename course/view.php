@@ -245,7 +245,68 @@
     }
 
     $PAGE->set_heading($course->fullname);
+
+    global $USER, $DB, $COURSE;
+
+// Handle request BEFORE output
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_access'])) {
+
+    $courseid = required_param('courseid', PARAM_INT);
+
+    // Check duplicate
+    $exists = $DB->record_exists('course_requests', [
+        'userid' => $USER->id,
+        'courseid' => $courseid
+    ]);
+
+    if (!$exists) {
+        $record = new stdClass();
+        $record->userid = $USER->id;
+        $record->courseid = $courseid;
+        $record->status = 'pending';
+        $record->timecreated = time();
+
+        $DB->insert_record('course_requests', $record);
+
+        redirect($PAGE->url, "Request Sent Successfully ✅", 2);
+    } else {
+        redirect($PAGE->url, "Request already sent ⚠️", 2);
+    }
+}
+
     echo $OUTPUT->header();
+
+    global $USER, $DB, $COURSE;
+
+// Check if student
+$isTeacher = has_capability('moodle/course:update', context_course::instance($COURSE->id));
+
+if (!$isTeacher) {
+
+    $exists = $DB->record_exists('course_requests', [
+        'userid' => $USER->id,
+        'courseid' => $COURSE->id
+    ]);
+
+    if (!$exists) {
+
+        echo '<form method="post">
+            <input type="hidden" name="courseid" value="'.$COURSE->id.'">
+            <button type="submit" name="request_access" style="
+                padding:10px;
+                background:#007BFF;
+                color:white;
+                border:none;
+                border-radius:6px;">
+                Request Enrollment
+            </button>
+        </form>';
+
+    } else {
+        echo "<p style='color:orange;'>Request already sent</p>";
+    }
+}
+
 
     if ($USER->editing == 1) {
 

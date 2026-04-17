@@ -98,8 +98,25 @@ $regionmainsettingsmenu = $buildregionmainsettings ? $OUTPUT->region_main_settin
 
 $header = $PAGE->activityheader;
 $headercontent = $header->export_for_template($renderer);
+//for teacher course box
+$isAdmin = is_siteadmin($USER);
+$isTeacher = !$isAdmin && has_capability('moodle/course:update', context_system::instance());
+
+if ($isAdmin || $isTeacher) {
+    $extraclasses[] = 'no-progress';
+}
+
+if (!$isAdmin && $isTeacher) {
+    $extraclasses[] = 'teacher-role';
+}
 
 $bodyattributes = $OUTPUT->body_attributes($extraclasses);
+
+$isAdmin = is_siteadmin($USER);
+$isTeacher = has_capability('moodle/course:update', context_system::instance());
+
+$templatecontext['isteacher'] = (!$isAdmin && $isTeacher);
+
 $templatecontext = [
     'sitename' => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
     'output' => $OUTPUT,
@@ -284,3 +301,8 @@ if ($isAdmin) {
 
     set_user_preference('popup_shown', 1, $USER);
 }
+if ($quiz_not_attempted) {
+    echo "<script>alert('Test is not submitted yet. Please complete your test.');</script>";
+}
+
+?>
