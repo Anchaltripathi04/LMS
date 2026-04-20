@@ -246,12 +246,21 @@
 
     $PAGE->set_heading($course->fullname);
 
-    global $USER, $DB, $COURSE;
-
-// Handle request BEFORE output
+   // ===== REQUEST INSERT LOGIC =====
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_access'])) {
 
-    $courseid = required_param('courseid', PARAM_INT);
+    require_sesskey();
+
+    $courseid = optional_param('courseid', $course->id, PARAM_INT); 
+
+    // Debug (temporary)
+    // echo "POST HIT"; die();
+
+    // Check already enrolled
+    $context = context_course::instance($courseid);
+    if (is_enrolled($context, $USER->id)) {
+        redirect($PAGE->url, "Already l", 2);
+    }
 
     // Check duplicate
     $exists = $DB->record_exists('course_requests', [
@@ -260,6 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_access'])) {
     ]);
 
     if (!$exists) {
+
         $record = new stdClass();
         $record->userid = $USER->id;
         $record->courseid = $courseid;
@@ -268,32 +278,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_access'])) {
 
         $DB->insert_record('course_requests', $record);
 
-        redirect($PAGE->url, "Request Sent Successfully ✅", 2);
+        redirect($PAGE->url, "Request Sent ✅", 2);
+
     } else {
-        redirect($PAGE->url, "Request already sent ⚠️", 2);
+        redirect($PAGE->url, "Already Requested ⚠️", 2);
     }
 }
-
     echo $OUTPUT->header();
 
-    global $USER, $DB, $COURSE;
+$context = context_course::instance($course->id);
+$isTeacher = has_capability('moodle/course:update', $context);
 
-// Check if student
-$isTeacher = has_capability('moodle/course:update', context_course::instance($COURSE->id));
-
-if (!$isTeacher) {
+if (!$isTeacher && !is_enrolled($context, $USER->id)) {
 
     $exists = $DB->record_exists('course_requests', [
         'userid' => $USER->id,
-        'courseid' => $COURSE->id
+        'courseid' => $course->id
     ]);
 
     if (!$exists) {
 
-        echo '<form method="post">
-            <input type="hidden" name="courseid" value="'.$COURSE->id.'">
+        echo '<form method="post" action="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">
+            <input type="hidden" name="courseid" value="'.$course->id.'">
+            <input type="hidden" name="sesskey" value="'.sesskey().'">
+
             <button type="submit" name="request_access" style="
-                padding:10px;
+                padding:10px 15px;
                 background:#007BFF;
                 color:white;
                 border:none;
@@ -306,7 +316,6 @@ if (!$isTeacher) {
         echo "<p style='color:orange;'>Request already sent</p>";
     }
 }
-
 
     if ($USER->editing == 1) {
 
