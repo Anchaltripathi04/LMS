@@ -115,7 +115,6 @@ $bodyattributes = $OUTPUT->body_attributes($extraclasses);
 $isAdmin = is_siteadmin($USER);
 $isTeacher = has_capability('moodle/course:update', context_system::instance());
 
-$templatecontext['isteacher'] = (!$isAdmin && $isTeacher);
 
 $templatecontext = [
     'sitename' => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
@@ -137,7 +136,8 @@ $templatecontext = [
     'overflow' => $overflow,
     'headercontent' => $headercontent,
     'addblockbutton' => $addblockbutton,
-    'enablecourseindex' => $themesettings->enablecourseindex
+    'enablecourseindex' => $themesettings->enablecourseindex,
+        'isteacher' => (!$isAdmin && $isTeacher)
 ];
 
 $templatecontext = array_merge($templatecontext, $themesettings->footer());
